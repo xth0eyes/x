@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ceph Gallery Viewer</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+
+        header {
+            position: relative;
+            width: 100%;
+            max-width: 1161px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            height: 60px;
+        }
+
+        .ceph-title {
+            font-family: 'Brush Script MT', 'Cursive', serif;
+            font-size: 3.5rem;
+            color: #fbc02d;
+            text-shadow: 0 0 30px rgba(251, 192, 45, 0.2);
+            letter-spacing: 3px;
+        }
+
+        .user-id-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 1161px;
+        }
+
+        #userIdDisplay {
+            background: linear-gradient(135deg, #fbc02d, #f57f17);
+            color: #121212;
+            border: 2px solid #fbc02d;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+            outline: none;
+            width: 100%;
+            max-width: 300px;
+            cursor: default;
+            box-shadow: 0 0 20px rgba(251, 192, 45, 0.3);
+        }
+
+        #gallery-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1161px;
+            padding: 20px;
+            border: 2px solid #fbc02d;
+            background-color: #1a1a1a;
+            border-radius: 8px;
+            min-height: 200px;
+            position: relative;
+        }
+
+        .gallery-item {
+            position: relative;
+            background-color: #2a2a2a;
+            border: 3px solid #fbc02d;
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 16 / 9;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 25px rgba(251, 192, 45, 0.5);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #loading-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fbc02d;
+            font-size: 1.2rem;
+        }
+
+        .floating-buttons {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .btn-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        .btn-circle:hover {
+            transform: scale(1.1);
+            opacity: 0.9;
+        }
+
+        .btn-exit {
+            background: linear-gradient(145deg, #b71c1c, #d32f2f, #121212);
+            color: #fff;
+        }
+
+        .btn-refresh {
+            background: linear-gradient(145deg, #fbc02d, #f57f17, #121212);
+            color: #121212;
+            border-color: #fbc02d;
+        }
+
+        #lightbox {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(18, 18, 18, 0.96);
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            animation: fadeIn 0.3s ease;
+        }
+
+        #lightbox.active {
+            display: flex;
+        }
+
+        #lightbox img {
+            max-width: 95%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 0 40px rgba(251, 192, 45, 0.2);
+        }
+
+        .close-lightbox {
+            position: absolute;
+            top: 20px;
+            right: 35px;
+            color: #fbc02d;
+            font-size: 45px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 0 15px;
+            border-radius: 8px;
+            user-select: none;
+        }
+
+        .close-lightbox:hover {
+            color: #fff;
+            background: #d32f2f;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @media (max-width: 600px) {
+            .ceph-title { font-size: 2.5rem; }
+            .floating-buttons { top: 10px; right: 10px; gap: 10px; }
+            .btn-circle { width: 50px; height: 50px; font-size: 1.5rem; }
+            #gallery-container { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+            #userIdDisplay { max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="floating-buttons">
+        <button class="btn-circle btn-exit" onclick="exitApp()" title="خروج از برنامه">✕</button>
+        <button class="btn-circle btn-refresh" onclick="refreshApp()" title="بارگذاری مجدد">⟳</button>
+    </div>
+
+    <header>
+        <h1 class="ceph-title">Ceph</h1>
+    </header>
+
+    <div class="user-id-container">
+        <input type="text" id="userIdDisplay" readonly placeholder="USER_ID">
+    </div>
+
+    <div id="gallery-container">
+        <div id="loading-text">در حال بارگذاری عکس‌ها...</div>
+    </div>
+
+    <div id="lightbox">
+        <span class="close-lightbox" onclick="closeLightbox()">&times;</span>
+        <img id="lightbox-img" src="" alt="Large View">
+    </div>
+
+    <script>
+        function getUserIdFromUrl() {
+            const path = window.location.pathname;
+            const segments = path.split('/').filter(seg => seg !== '');
+            return segments.length > 0 ? segments[segments.length - 1] : 'user123';
+        }
+
+        async function loadImages() {
+            const container = document.getElementById('gallery-container');
+            const userIdDisplay = document.getElementById('userIdDisplay');
+            
+            const userId = getUserIdFromUrl();
+            userIdDisplay.value = userId;
+
+            container.innerHTML = '<div id="loading-text">در حال بارگذاری عکس‌ها...</div>';
+
+            try {
+                const endpoint = `https://talghsamen.ir/get-view/${userId}`;
+                const response = await fetch(endpoint);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP Error: ${response.status}`);
+                }
+
+                const imageUrls = await response.json();
+
+                if (!imageUrls || imageUrls.length === 0) {
+                    container.innerHTML = '<p style="color: #fbc02d; text-align: center; padding: 20px;">هیچ عکسی برای این کاربر یافت نشد.</p>';
+                    return;
+                }
+
+                container.innerHTML = ''; 
+
+                imageUrls.forEach(imgUrl => {
+                    const item = document.createElement('div');
+                    item.className = 'gallery-item';
+
+                    const img = document.createElement('img');
+                    img.src = imgUrl; 
+                    img.alt = 'Gallery Image';
+                    
+                    img.onerror = function() {
+                        console.error("خطا در لود عکس:", imgUrl);
+                        this.src = 'https://via.placeholder.com/300x200/333/fbc02d?text=Error+Loading';
+                    };
+
+                    img.onclick = function(e) {
+                        e.stopPropagation();
+                        openLightbox(imgUrl);
+                    };
+
+                    item.appendChild(img);
+                    container.appendChild(item);
+                });
+
+            } catch (error) {
+                console.error("خطا در ارتباط با سرور:", error);
+                container.innerHTML = `
+                    <div style="color: #d32f2f; text-align: center; width: 100%; padding: 40px;">
+                        <h3>خطا در دریافت لیست عکس‌ها</h3>
+                        <p>مطمئن شوید که اندپوینت فعال است و آدرس لینک صحیح است.</p>
+                        <small style="color: #fbc02d;">${error.message}</small>
+                    </div>
+                `;
+            }
+        }
+
+        function openLightbox(src) {
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            lightboxImg.src = src;
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
+
+            if (window.Telegram && window.Telegram.WebApp) {
+                Telegram.WebApp.BackButton.show();
+                Telegram.WebApp.BackButton.onClick(closeLightbox);
+            }
+        }
+
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.remove('active');
+            document.body.style.overflow = 'auto';
+
+            if (window.Telegram && window.Telegram.WebApp) {
+                Telegram.WebApp.BackButton.hide();
+                Telegram.WebApp.BackButton.offClick(closeLightbox);
+            }
+        }
+
+        function exitApp() {
+            if (window.Telegram && window.Telegram.WebApp) {
+                if (confirm('آیا مطمئن هستید که می‌خواهید از مینی‌اپ خارج شوید؟')) {
+                    Telegram.WebApp.close();
+                }
+            } else {
+                if (confirm('آیا مطمئن هستید که می‌خواهید خارج شوید؟')) {
+                    window.close(); 
+                    if (!window.closed) {
+                        window.history.back();
+                    }
+                }
+            }
+        }
+
+        function refreshApp() {
+            location.reload();
+        }
+
+        window.onload = function() {
+            if (window.Telegram && window.Telegram.WebApp) {
+                Telegram.WebApp.ready();
+            }
+            loadImages();
+        };
+    </script>
+</body>
+</html>
+

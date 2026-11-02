@@ -1,0 +1,57 @@
+{
+  "name": "ceph",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-linux": "tsc && rsync -av --include='*/' --exclude='*.{ts,tsx}' source/ dist/",
+    "build-win32": "tsc && copyfiles -u 1 source/**/* dist --exclude \"**/*.{ts,tsx}\" && robocopy source dist /E /XF *.ts *.tsx /XD node_modules"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@exortek/fastify-mongo-sanitize": "^2.0.2",
+    "@fastify/multipart": "^10.0.0",
+    "@fastify/rate-limit": "^10.3.0",
+    "@fastify/static": "^9.1.3",
+    "@grammyjs/types": "^3.28.0",
+    "@types/lodash": "^4.17.24",
+    "axios": "^1.14.0",
+    "eventemitter3": "^5.0.4",
+    "fastify": "^5.8.2",
+    "file-type": "^22.0.1",
+    "firebase-admin": "^14.4.0",
+    "google-auth-library": "^11.0.2",
+    "grammy": "^1.44.0",
+    "ioredis": "^5.10.0",
+    "joi": "^18.1.2",
+    "lodash": "^4.18.1",
+    "mongodb": "^7.1.0",
+    "nanoid": "^5.1.15",
+    "sharp": "^0.35.2",
+    "ws": "^8.21.0"
+  },
+  "devDependencies": {
+    "@types/eventemitter3": "^1.2.0",
+    "@types/ioredis": "^4.28.10",
+    "@types/joi": "^17.2.2",
+    "@types/jszip": "^3.4.1",
+    "@types/mongodb": "^4.0.6",
+    "@types/nanoid": "^3.0.0",
+    "@types/node": "^25.5.0",
+    "@types/sharp": "^0.32.0",
+    "@types/ws": "^8.18.1",
+    "copyfiles": "^2.4.1"
+  },
+  "include": [
+    "source/**/*"
+  ],
+  "exlude": [
+    "node_modules",
+    "dist"
+  ]
+}
+

@@ -1,0 +1,24 @@
+{
+    "scarlett_token": "9225063566:AAHK9Z5cKJc3hcNwGf69jJX9sJasB9vWCGU",
+    "middlegirl_token": "9225063566:AAHK9Z5cKJc3hcNwGf69jJX9sJasB9vWCGU",
+    "cservice_token": "9056245597:AAEQfO4ObNE_vXO9Rzn_x9-IHtxOpfqj1YA",
+    "chat_id": -1004397494985,
+    "temp_chat_id": -5183376245,
+    "ceph_telegram_channel_link": "https://t.me/the_xen_community",
+    "ceph_telegram_persianguide_link": "https://t.me/the_xen_community",
+    "key": "841970ef716a46881acc3c8998c10e0b6b6515ac8161ee84bf49e7c43487b73b",
+    "bot_wallet": "XXX-BOT-WALLET-XXX",
+    "payment": [
+        { "days": 5, "pay": 5 },
+        { "days": 10, "pay": 10 },
+        { "days": 15, "pay": 15 },
+        { "days": 20, "pay": 20 }
+    ],
+    "admins": [
+        { "id": 8538174974, "role": "owner" },
+        { "id": 1316011710, "role": "owner" },
+        { "id": 8809413613, "role": "owner" },
+        { "id": 8766887749, "role": "owner" },
+        { "id": 5047714806, "role": "owner" }
+    ]
+}

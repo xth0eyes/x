@@ -1,0 +1,5 @@
+node_modules
+dist
+source/t.ts
+TODO.txt
+source/activity/firebase/service-account.json
